@@ -13,6 +13,8 @@
   "dependencies": {
     "dotenv": "^16.0.1",
     "jp-prefecture": "^0.2.1",
-    "neo4j-driver": "^4.4.7"
+    "neo4j-driver": "^4.4.7",
+    "pino": "^8.4.2",
+    "pino-pretty": "^9.0.1"
   }
 }

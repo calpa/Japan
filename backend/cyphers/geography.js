@@ -1,5 +1,5 @@
 // Use Tag Function to highlight in VS Code
-const cypher = (query) => query.raw[0]
+const cypher = (query) => query.raw[0];
 
 const createRegions = cypher`
 UNWIND $regions as region
@@ -11,7 +11,7 @@ WITH r, region.neighbor as neighbor
 UNWIND neighbor as id
 MERGE (r2:Region{id: id})
 MERGE (r)-[:NEIGHBOR]-(r2)
-`
+`;
 
 const createPrefectures = cypher`
 UNWIND $prefectures as prefecture
@@ -29,9 +29,9 @@ WITH p, neighbor
 UNWIND neighbor as id
 MERGE (p2:Prefecture{id: id})
 MERGE (p)-[:NEIGHBOR]-(p2)
-`
+`;
 
 module.exports = {
-    createRegions,
-    createPrefectures,
-}
+  createRegions,
+  createPrefectures,
+};

@@ -1,34 +1,30 @@
-require('dotenv').config()
+require("dotenv").config();
+const neo4j = require("neo4j-driver");
+const { createRegions, createPrefectures } = require("./functions/geography");
 
-const {
-    createRegions,
-    createPrefectures,
-} = require('./cyphers/geography')
+const logger = require("./helpers/logger");
 
 async function main () {
-    const jpPrefecture = require("jp-prefecture");
+    const driver = neo4j.driver(
+        process.env.NEO4J_URI,
+        neo4j.auth.basic(process.env.NEO4j_USERNAME, process.env.NEO4J_PASSWORD)
+    );
 
-    const regions = jpPrefecture.getAll("region");
-
-    const prefectures = jpPrefecture.getAll("pref");
-
-    const neo4j = require('neo4j-driver')
-    const driver = neo4j.driver(process.env.NEO4J_URI, neo4j.auth.basic(process.env.NEO4j_USERNAME, process.env.NEO4J_PASSWORD))
-
-    const session = driver.session()
+    const session = driver.session();
+    const ctx = {
+        session,
+    };
 
     try {
-        await session.run(createRegions, { regions })
-
-        await session.run(createPrefectures, { prefectures })
-        console.log('Finished')
+        await createRegions(ctx);
+        await createPrefectures(ctx);
     } catch (err) {
-        console.error(err)
+        console.error(err);
     } finally {
-        session.close()
-        console.log('Session is closed')
-        process.exit(0)
+        session.close();
+        logger.info("Session is closed");
+        process.exit(0);
     }
 }
 
-main()
+main();
