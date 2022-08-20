@@ -43,7 +43,7 @@ SET c.en = city.en,
 WITH c, city
 MATCH (p:Prefecture{en: toLower(city.prefecture)})
 MERGE (c)-[:IN]->(p)
-`
+`;
 
 module.exports = {
   createRegions,

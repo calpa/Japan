@@ -1,6 +1,10 @@
 require("dotenv").config();
 const neo4j = require("neo4j-driver");
-const { createRegions, createPrefectures, createCities } = require("./functions/geography");
+const {
+    createRegions,
+    createPrefectures,
+    createCities,
+} = require("./functions/geography");
 
 const logger = require("./helpers/logger");
 
@@ -18,7 +22,7 @@ async function main () {
     try {
         await createRegions(ctx);
         await createPrefectures(ctx);
-        await createCities(ctx)
+        await createCities(ctx);
     } catch (err) {
         console.error(err);
     } finally {
