@@ -31,7 +31,22 @@ MERGE (p2:Prefecture{id: id})
 MERGE (p)-[:NEIGHBOR]-(p2)
 `;
 
+const createCities = cypher`
+UNWIND $cities as city
+MERGE (c:City{id: city.id})
+SET c.en = city.en,
+    c.name = city.name,
+    c.population = apoc.number.parseInt(city.population),
+    c.area = apoc.number.parseFloat(city.area),
+    c.density = apoc.number.parseFloat(city.density),
+    c.founded = city.founded
+WITH c, city
+MATCH (p:Prefecture{en: toLower(city.prefecture)})
+MERGE (c)-[:IN]->(p)
+`
+
 module.exports = {
   createRegions,
   createPrefectures,
+  createCities,
 };
