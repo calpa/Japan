@@ -42,11 +42,36 @@ SET c.en = city.en,
     c.founded = city.founded
 WITH c, city
 MATCH (p:Prefecture{en: toLower(city.prefecture)})
+WHERE p.en = toLower(city.prefecture)
+  OR p.en = toLower(
+    replace(
+      replace(city.prefecture, 'ō', 'o'),
+      'Ō',
+      'O'
+    )
+  )
 MERGE (c)-[:IN]->(p)
 `;
+
+const createAirports = cypher`
+UNWIND $airports as airport
+MERGE (a:Airport{name: airport.name})
+SET a.ICAO = airport.ICAO,
+    a.IATA = airport.IATA
+
+WITH a, airport
+MERGE (c1:Classification{name: airport.classification})
+MERGE (a)-[:IS]->(c1)
+
+WITH a, airport
+UNWIND airport.cities as city
+MATCH (c2:City{en: city})
+MERGE (c2)-[:HAS]->(a)
+`
 
 module.exports = {
   createRegions,
   createPrefectures,
   createCities,
+  createAirports,
 };
