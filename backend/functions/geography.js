@@ -77,6 +77,7 @@ const createAirports = async (ctx) => {
     object.cities = object.Municipality.split(' / ')
     object.name = object['Airport name']
     object.classification = object['Classification']
+    object.prefecture = object['Prefecture'].split(' / ')
     return object;
   })
 

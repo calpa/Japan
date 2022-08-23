@@ -65,7 +65,9 @@ MERGE (a)-[:IS]->(c1)
 
 WITH a, airport
 UNWIND airport.cities as city
-MATCH (c2:City{en: city})
+UNWIND airport.prefecture as prefecture
+MATCH (c2:City{en: city})-[:IN]->(p:Prefecture)
+WHERE p.en = toLower(prefecture)
 MERGE (c2)-[:HAS]->(a)
 `
 
