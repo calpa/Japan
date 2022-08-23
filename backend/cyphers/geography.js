@@ -33,7 +33,7 @@ MERGE (p)-[:NEIGHBOR]-(p2)
 
 const createCities = cypher`
 UNWIND $cities as city
-MERGE (c:City{id: city.id})
+MERGE (c:Municipal:City{id: city.id})
 SET c.en = city.en,
     c.name = city.name,
     c.population = apoc.number.parseInt(city.population),
@@ -64,11 +64,21 @@ MERGE (c1:Classification{name: airport.classification})
 MERGE (a)-[:IS]->(c1)
 
 WITH a, airport
-UNWIND airport.cities as city
+UNWIND airport.municipality as municipal
 UNWIND airport.prefecture as prefecture
-MATCH (c2:City{en: city})-[:IN]->(p:Prefecture)
+MERGE (m:Municipal{en: municipal})
+WITH a, airport, m, municipal, prefecture
+MATCH (p:Prefecture)
 WHERE p.en = toLower(prefecture)
-MERGE (c2)-[:HAS]->(a)
+  OR p.en = toLower(
+    replace(
+      replace(prefecture, 'ō', 'o'),
+      'Ō',
+      'O'
+    )
+  )
+MERGE (m)-[:IN]->(p)
+MERGE (m)-[:HAS]->(a)
 `
 
 module.exports = {
