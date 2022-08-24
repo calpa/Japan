@@ -78,11 +78,37 @@ WHERE p.en = toLower(prefecture)
     )
   )
 MERGE (m)-[:HAS]->(a)
-`
+`;
+
+// Set area, en property in Village node, and link to the District and the Prefecture
+const createVillages = cypher`
+UNWIND $villages as village
+MERGE (v:Village:Municipal{name: village.name})
+SET v.area = village.area,
+    v.en = village.en
+
+WITH v, village
+MERGE (d:District{name: village.district})
+MERGE (v)-[:IN]->(d)
+
+WITH v, village, village.prefecture as prefecture, d
+MATCH (p:Prefecture)
+WHERE p.en = toLower(prefecture)
+  OR p.en = toLower(
+    replace(
+      replace(prefecture, 'ō', 'o'),
+      'Ō',
+      'O'
+    )
+  )
+MERGE (v)-[:IN]->(p)
+MERGE (d)-[:IN]->(p)
+`;
 
 module.exports = {
   createRegions,
   createPrefectures,
   createCities,
   createAirports,
+  createVillages,
 };

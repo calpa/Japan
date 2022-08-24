@@ -24,23 +24,25 @@ const createPrefectures = async (ctx) => {
 };
 
 const createCities = async (ctx) => {
-  const url = `https://en.wikipedia.org/wiki/List_of_cities_in_Japan`
+  const url = `https://en.wikipedia.org/wiki/List_of_cities_in_Japan`;
   const { data } = await axios.get(url);
 
   const $ = cheerio.load(data);
-  const table = $("#mw-content-text > div.mw-parser-output > table:nth-child(9) tr")
+  const table = $(
+    "#mw-content-text > div.mw-parser-output > table:nth-child(9) tr"
+  )
     .map((index, element) => ({
-      en: $(element).find('td:nth-child(1) a').text().trim(),
-      name: $(element).find('td:nth-child(2)').text().trim(),
-      prefecture: $(element).find('td:nth-child(3) a').text().trim(),
-      population: $(element).find('td:nth-child(4)').text().trim(),
-      area: $(element).find('td:nth-child(5)').text().trim(),
-      density: $(element).find('td:nth-child(6)').text().trim(),
-      founded: $(element).find('td:nth-child(7)').text().trim(),
+      en: $(element).find("td:nth-child(1) a").text().trim(),
+      name: $(element).find("td:nth-child(2)").text().trim(),
+      prefecture: $(element).find("td:nth-child(3) a").text().trim(),
+      population: $(element).find("td:nth-child(4)").text().trim(),
+      area: $(element).find("td:nth-child(5)").text().trim(),
+      density: $(element).find("td:nth-child(6)").text().trim(),
+      founded: $(element).find("td:nth-child(7)").text().trim(),
     }))
-    .get()
+    .get();
 
-  logger.info(`Expected number of cities to be ${table.length}`)
+  logger.info(`Expected number of cities to be ${table.length}`);
 
   const cities = table.map((city) => {
     const object = city;
@@ -69,27 +71,49 @@ const createCities = async (ctx) => {
 };
 
 const createAirports = async (ctx) => {
-  const url = `https://www.wikitable2json.com/api/List_of_airports_in_Japan?table=0&keyRows=1`
-  const { data } = await axios.get(url)
+  const url = `https://www.wikitable2json.com/api/List_of_airports_in_Japan?table=0&keyRows=1`;
+  const { data } = await axios.get(url);
 
   const airports = data[0].map((airport) => {
     const object = airport;
-    object.municipality = object.Municipality.split(' / ')
-    object.name = object['Airport name']
-    object.classification = object['Classification']
-    object.prefecture = object['Prefecture'].split(' / ')
+    object.municipality = object.Municipality.split(" / ");
+    object.name = object["Airport name"];
+    object.classification = object["Classification"];
+    object.prefecture = object["Prefecture"].split(" / ");
     return object;
-  })
+  });
 
-  const result = await ctx.session.run(geography.createAirports, { airports })
+  const result = await ctx.session.run(geography.createAirports, { airports });
 
-  logger.info(`Airports created`)
-  return data
-}
+  logger.info(`Airports created`);
+  return result;
+};
+
+const createVillages = async (ctx) => {
+  const url = `https://www.wikitable2json.com/api/List_of_villages_in_Japan?table=0&keyRows=1`;
+  const { data } = await axios.get(url);
+
+  const villages = data[0].map((village) => {
+    return {
+      area: village["Area (in km²)"],
+      district: village["District"],
+      name: village["Japanese"],
+      prefecture: village["Prefecture"],
+      en: village["Village"],
+    };
+  });
+
+  const result = await ctx.session.run(geography.createVillages, { villages });
+
+  logger.info(`Villages created`);
+
+  return result;
+};
 
 module.exports = {
   createRegions,
   createPrefectures,
   createCities,
-  createAirports
+  createAirports,
+  createVillages,
 };
