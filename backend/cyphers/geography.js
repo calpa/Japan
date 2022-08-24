@@ -41,7 +41,7 @@ SET c.en = city.en,
     c.density = apoc.number.parseFloat(city.density),
     c.founded = city.founded
 WITH c, city
-MATCH (p:Prefecture{en: toLower(city.prefecture)})
+MATCH (p:Prefecture)
 WHERE p.en = toLower(city.prefecture)
   OR p.en = toLower(
     replace(
@@ -68,7 +68,7 @@ UNWIND airport.municipality as municipal
 UNWIND airport.prefecture as prefecture
 MERGE (m:Municipal{en: municipal})
 WITH a, airport, m, municipal, prefecture
-MATCH (p:Prefecture)
+MATCH (m)-[:IN]->(p:Prefecture)
 WHERE p.en = toLower(prefecture)
   OR p.en = toLower(
     replace(
@@ -77,7 +77,6 @@ WHERE p.en = toLower(prefecture)
       'O'
     )
   )
-MERGE (m)-[:IN]->(p)
 MERGE (m)-[:HAS]->(a)
 `
 
