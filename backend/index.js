@@ -5,6 +5,7 @@ const {
   createPrefectures,
   createCities,
   createAirports,
+  createVillages,
 } = require("./functions/geography");
 
 const logger = require("./helpers/logger");
@@ -25,6 +26,7 @@ async function main() {
     await createPrefectures(ctx);
     await createCities(ctx);
     await createAirports(ctx);
+    await createVillages(ctx);
   } catch (err) {
     console.error(err);
   } finally {
