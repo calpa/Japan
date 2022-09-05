@@ -110,10 +110,32 @@ const createVillages = async (ctx) => {
   return result;
 };
 
+const createTowns = async (ctx) => {
+  const url = `https://www.wikitable2json.com/api/List_of_towns_in_Japan?table=0&keyRows=1`;
+  const { data } = await axios.get(url);
+
+  const towns = data[0].map((town) => {
+    return {
+      en: town["Town"],
+      name: town["Japanese"],
+      prefecture: town["Prefecture"],
+      area: town["Area (km2)"],
+      district: town["District"],
+    };
+  });
+
+  logger.info(`Expected number of towns: ${towns.length}`);
+
+  const result = await ctx.session.run(geography.createTowns, { towns });
+
+  return result;
+};
+
 module.exports = {
   createRegions,
   createPrefectures,
   createCities,
   createAirports,
   createVillages,
+  createTowns,
 };

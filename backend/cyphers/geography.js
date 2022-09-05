@@ -36,10 +36,22 @@ UNWIND $cities as city
 MERGE (c:Municipal:City{id: city.id})
 SET c.en = city.en,
     c.name = city.name,
-    c.population = apoc.number.parseInt(city.population),
-    c.area = apoc.number.parseFloat(city.area),
-    c.density = apoc.number.parseFloat(city.density),
     c.founded = city.founded
+
+MERGE (m1:Metric{name: 'population'})
+MERGE (m2:Metric{name: 'area'})
+MERGE (m3:Metric{name: 'density'})
+
+MERGE (c)-[hm1:HAS_METRIC]->(m1)
+SET hm1.value = apoc.number.parseFloat(city.population)
+
+MERGE (c)-[hm2:HAS_METRIC]->(m2)
+SET hm2.value = apoc.number.parseFloat(city.area)
+
+MERGE (c)-[hm3:HAS_METRIC]->(m3)
+SET hm3.value = apoc.number.parseFloat(city.density)
+
+
 WITH c, city
 MATCH (p:Prefecture)
 WHERE p.en = toLower(city.prefecture)
@@ -84,8 +96,11 @@ MERGE (m)-[:HAS]->(a)
 const createVillages = cypher`
 UNWIND $villages as village
 MERGE (v:Village:Municipal{name: village.name})
-SET v.area = village.area,
-    v.en = village.en
+SET v.en = village.en
+
+MERGE (m:Metric{name: 'area'})
+MERGE (v)-[hm:HAS_METRIC]->(m)
+SET hm.value = toFloat(village.area)
 
 WITH v, village
 MERGE (d:District{name: village.district})
@@ -105,10 +120,34 @@ MERGE (v)-[:IN]->(p)
 MERGE (d)-[:IN]->(p)
 `;
 
+const createTowns = cypher`
+UNWIND $towns as town
+MATCH (p:Prefecture)
+WHERE p.en = toLower(town.prefecture)
+  OR p.en = toLower(
+    replace(
+      replace(town.prefecture, 'ō', 'o'),
+      'Ō',
+      'O'
+    )
+  )
+
+MERGE (t:Town:Municipal{name: town.name})-[:IN]->(p)
+SET t.en = town.en
+
+WITH t, town
+MERGE (d:District {name: town.district})
+MERGE (t)-[:IN]->(d)
+MERGE (m:Metric{name: 'area'})
+MERGE (t)-[hm:HAS_METRIC]->(m)
+SET hm.value = apoc.number.parseFloat(town.area)
+`;
+
 module.exports = {
   createRegions,
   createPrefectures,
   createCities,
   createAirports,
   createVillages,
+  createTowns,
 };
