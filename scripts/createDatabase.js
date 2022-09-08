@@ -7,9 +7,9 @@ const {
   createAirports,
   createVillages,
   createTowns,
-} = require("./functions/geography");
+} = require("../backend/functions/geography");
 
-const logger = require("./helpers/logger");
+const logger = require("../backend/helpers/logger");
 
 async function main() {
   const driver = neo4j.driver(
