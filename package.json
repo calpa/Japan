@@ -4,7 +4,6 @@
   "description": "This is a repository for discovering Japan using neo4j, JavaScript.",
   "main": "index.js",
   "scripts": {
-    "test": "jest --passWithNoTests",
     "prepare": "husky install"
   },
   "repository": {
